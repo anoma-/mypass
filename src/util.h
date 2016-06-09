@@ -7,8 +7,8 @@
 #include <errno.h>
 
 struct token_t {
-	char **token_list;
-	int list_size;
+    char **token_list;
+    int list_size;
 };
 
 struct token_t *Token_tokenize (const unsigned char *, size_t, const char *, int);

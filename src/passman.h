@@ -9,9 +9,9 @@
 #include <unistd.h>
 
 struct User_Account {
-	size_t db_size;
-	char *db_path;
-	byte *user_salt;
+    size_t db_size;
+    char *db_path;
+    byte *user_salt;
 };
 
 User_Account * new_user_account ();
@@ -39,7 +39,7 @@ void print_help ();
 int write_buf_to_disk (char *db_path, byte *buffer, size_t buf_size);
 
 int process_request (Record *r, uint16_t actions, Record_List *rl, 
-					 User_Account *user, Crypt *crypt);
+                     User_Account *user, Crypt *crypt);
 
 int create_account (char *db_path, uint8_t overwrite);
 

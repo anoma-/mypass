@@ -8,10 +8,10 @@
 #include "util.h"
 
 struct Crypt {
-	int   start;
-	char *password;
-	byte *password_hashed;
-	char *delimeter;
+    int   start;
+    char *password;
+    byte *password_hashed;
+    char *delimeter;
 };
 
 struct Crypt * new_crypt ();
