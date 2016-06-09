@@ -1,0 +1,16 @@
+Depends on openssl development package. libcrypto.so, aes.h, and rand.h specifically.
+
+The command:
+:$ make
+
+will produce an executable
+
+:$ make install
+
+will move the executable to /usr/local/bin if executed with root privileges
+
+:$ ./setup 
+
+will then create a directory $HOME/.mypass
+
+

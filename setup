@@ -1,0 +1,3 @@
+#!/bin/bash
+
+mkdir ~/.mypass >> /dev/null
