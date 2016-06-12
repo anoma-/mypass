@@ -612,6 +612,7 @@ void capitalize_input (char *buffer, int buffer_size)
 ssize_t getline (char **arg, size_t *read, FILE *stream)
 {
     char *line = NULL;
+    char *temp = NULL;
     size_t so_far      =  0;
     ssize_t failure    = -1;
     size_t current_max = 64;
@@ -627,9 +628,13 @@ ssize_t getline (char **arg, size_t *read, FILE *stream)
         do {
             if (so_far == current_max)
             {
-                line = realloc (line, (current_max*2) + 1);
-                if (!line)
+                temp = realloc (line, (current_max*2) + 1);
+                if (!temp)
+                {
+                    free (line);
                     return failure;
+                }
+                line = temp;
                 current_max *= 2;
             } 
             c = fgetc (stream);
