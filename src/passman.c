@@ -621,7 +621,7 @@ ssize_t getline (char **arg, size_t *read, FILE *stream)
 
     if (*arg == NULL && *read == 0)
     {
-            line = calloc (65, 1);
+            line = malloc (65);
         if (!line)
             return failure;
 
@@ -644,6 +644,7 @@ ssize_t getline (char **arg, size_t *read, FILE *stream)
             
         } while (1);
 
+        line[so_far] = '\0';
         *read = so_far;
         *arg = line;
         return so_far;
