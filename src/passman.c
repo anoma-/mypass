@@ -987,6 +987,8 @@ uint8_t get_uint (char *arg)
         fprintf (stderr, "Error: Integer must be a positive whole number\n");
         return failure;
     }
+    if (convert > 255)
+        return failure;
     return (uint8_t) convert;
 }
 
