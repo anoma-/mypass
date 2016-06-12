@@ -650,17 +650,17 @@ ssize_t getline (char **arg, size_t *read, FILE *stream)
         return so_far;
     }
 
-    if (*arg == NULL) 
+    if (*arg == NULL && *read != 0) 
         return failure;
-
+    line = *arg;
     while (so_far < *read)
     {
         c = fgetc (stream);
-        *arg[so_far++] = (char) c;
+        line[so_far++] = (char) c;
         if (c == nl)
             break;
     }
-    *arg[so_far] = '\0';
+    line[so_far] = '\0';
     return so_far;
 }
 
