@@ -609,6 +609,55 @@ void capitalize_input (char *buffer, int buffer_size)
     }
 }
 
+ssize_t getline (char **arg, size_t *read, FILE *stream)
+{
+    char *line = NULL;
+    size_t so_far      =  0;
+    ssize_t failure    = -1;
+    size_t current_max = 64;
+    int c = 0;
+    int nl = '\n';
+
+    if (*arg == NULL && *read == 0)
+    {
+            line = calloc (65, 1);
+        if (!line)
+            return failure;
+
+        do {
+            if (so_far == current_max)
+            {
+                line = realloc (line, (current_max*2) + 1);
+                if (!line)
+                    return failure;
+                current_max *= 2;
+            } 
+            c = fgetc (stream);
+            line[so_far++] = (char) c;
+            if (c == nl)
+                break;
+            
+        } while (1);
+
+        *read = so_far;
+        *arg = line;
+        return so_far;
+    }
+
+    if (*arg == NULL) 
+        return failure;
+
+    while (so_far < *read)
+    {
+        c = fgetc (stream);
+        *arg[so_far++] = (char) c;
+        if (c == nl)
+            break;
+    }
+    *arg[so_far] = '\0';
+    return so_far;
+}
+
 byte * complete_questionaire ()
 {
     size_t tot_len     = 0;
@@ -624,7 +673,13 @@ byte * complete_questionaire ()
     char *street    = NULL;
     char *ssn       = NULL;
     char *combo     = NULL;
-
+    ssize_t fname_len =   0;
+    ssize_t mname_len =   0;
+    ssize_t lname_len =   0;
+    ssize_t bdate_len =   0;
+    ssize_t mscho_len =   0;
+    ssize_t street_len =  0;
+    ssize_t ssn_len =     0;
 
     printf ("  The following questionaire will be used in salting the passwords generated\n");
     printf ("this program. To recreate the same passwords, the exact same answers need to\n");
@@ -634,93 +689,157 @@ byte * complete_questionaire ()
     printf ("make it easier to remember the format you answered it in\n\n");
 
     printf ("First Name:\n");
-    if ((read = getline (&fname, &length, stdin)) == -1)    
+    if ((fname_len = getline (&fname, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
+    if (fname_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        free (fname);
+        return failure;
+    }
+    tot_len += fname_len;
     capitalize_input (fname, read);
-    read = 0;
+    length = 0;
 
     printf ("Middle Name:\n");
-    if ((read = getline (&mname, &length, stdin)) == -1)    
+    if ((mname_len = getline (&mname, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
+    if (mname_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        free (mname);
+        return failure;
+    }
+    tot_len += mname_len;
     capitalize_input (mname, read);
-    read = 0;
+    length = 0;
 
     printf ("Last Name:\n");
-    if ((read = getline (&lname, &length, stdin)) == -1)    
+    if ((lname_len = getline (&lname, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
-    capitalize_input (lname, read);
-    read = 0;
+    if (lname_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        free (lname);
+        return failure;
+    }
 
+    tot_len += lname_len;
+    capitalize_input (lname, read);
+    length = 0;
 
     printf ("Birthdate (00/00/0000):\n");
-    if ((read = getline (&bdate, &length, stdin)) == -1)    
+    if ((bdate_len = getline (&bdate, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
-    capitalize_input (bdate, read);
-    read = 0;
+    if (bdate_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        free (bdate);
+        return failure;
+    }
 
+    tot_len += bdate_len;
+    capitalize_input (bdate, read);
+    length = 0;
 
     printf ("Middle School Attended:\n");
-    if ((read = getline (&mscho, &length, stdin)) == -1)    
+    if ((mscho_len = getline (&mscho, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
-    capitalize_input (mscho, read);
-    read = 0;
+    if (mscho_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
+        free (mscho);
+        return failure;
+    }
 
+    tot_len += mscho_len;
+    capitalize_input (mscho, read);
+    length = 0;
 
     printf ("Street you grew up on\n");
-    if ((read = getline (&street, &length, stdin)) == -1)   
+    if ((street_len = getline (&street, &length, stdin)) == -1)   
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
+    if (street_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
+        secure_free (mscho, mscho_len);
+        free (street);
+        return failure;
+    }
+ 
+    tot_len += street_len;
     capitalize_input (street, read);
-    read = 0;
-
+    length = 0;
 
     printf ("Social Security Number (xxx-xx-xxxx):\n");
-    if ((read = getline (&ssn, &length, stdin)) == -1)  
+    if ((ssn_len = getline (&ssn, &length, stdin)) == -1)  
     {
         fprintf (stderr, "Error: Could not read input\n");
         return failure;
     }
-    tot_len += read;
+    if (ssn_len <= 0)
+    {
+        fprintf (stderr, "Error: invalid read of input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
+        secure_free (mscho, mscho_len);
+        secure_free (street, street_len);
+        free (ssn);
+        return failure;
+    }
+
+    tot_len += ssn_len;
     capitalize_input (ssn, read);
-    read = 0;
+    length = 0;
 
     combo = calloc (tot_len + 1, 1);
-    strcat (combo, fname);
-    strcat (combo, mname);
-    strcat (combo, lname);
-    strcat (combo, bdate);
-    strcat (combo, mscho);
-    strcat (combo, street);
-    strcat (combo, ssn);
+    strncat (combo, fname, fname_len);
+    strncat (combo, mname, mname_len);
+    strncat (combo, lname, lname_len);
+    strncat (combo, bdate, bdate_len);
+    strncat (combo, mscho, mscho_len);
+    strncat (combo, street, street_len);
+    strncat (combo, ssn, ssn_len);
 
     user_salt = get_var_len_hash ((byte*) combo, tot_len, 16);
-    secure_free (fname, strlen (fname)); secure_free (mname, strlen (mname)); 
-    secure_free (bdate, strlen (bdate)); secure_free (lname, strlen (lname));  
-    secure_free (street, strlen (street)); secure_free (mscho, strlen (mscho));  
-    secure_free (ssn, strlen (ssn)); secure_free (combo, strlen (combo));
+    secure_free (fname, fname_len); secure_free (mname, mname_len); 
+    secure_free (bdate, bdate_len); secure_free (lname, lname_len);  
+    secure_free (street, street_len); secure_free (mscho, mscho_len);  
+    secure_free (ssn, ssn_len); secure_free (combo, tot_len);
 
     return user_salt;
 }
@@ -729,8 +848,8 @@ char * get_new_password ()
 {
     char *failure  = NULL;
     char *password = NULL;
-    size_t length;
-    ssize_t read;
+    size_t length = 0;
+    ssize_t read  = 0;
     char newline = '\n';
 
     printf ("Warning: Most of the entropy comes from your password\n");

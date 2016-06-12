@@ -1,6 +1,5 @@
 #ifndef __PASSMAN_H__
 #define __PASSMAN_H__
-#define _GNU_SOURCE
 #include "common.h"
 #include "util.h"
 #include "records.h"
