@@ -668,7 +668,6 @@ byte * complete_questionaire ()
 {
     size_t tot_len     = 0;
     size_t length      = 0;
-    ssize_t read       = 0;
     byte *failure   = NULL;
     byte *user_salt = NULL;
     char *fname     = NULL;

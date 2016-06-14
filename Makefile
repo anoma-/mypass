@@ -6,7 +6,7 @@ NAME=mypass
 MCK=-O1 -g -fsanitize=address -fno-omit-frame-pointer
 
 default:
-	$(CC) $(FLAGS) -g $(SOURCES) $(LINK_AES) -o $(NAME)
+	$(CC) $(FLAGS) $(SOURCES) $(LINK_AES) -o $(NAME)
 
 install:
 	mv $(NAME) /usr/local/bin
