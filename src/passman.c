@@ -707,7 +707,7 @@ byte * complete_questionaire ()
         return failure;
     }
     tot_len += fname_len;
-    capitalize_input (fname, read);
+    capitalize_input (fname, fname_len);
     length = 0;
 
     printf ("Middle Name:\n");
@@ -724,7 +724,7 @@ byte * complete_questionaire ()
         return failure;
     }
     tot_len += mname_len;
-    capitalize_input (mname, read);
+    capitalize_input (mname, mname_len);
     length = 0;
 
     printf ("Last Name:\n");
@@ -743,7 +743,7 @@ byte * complete_questionaire ()
     }
 
     tot_len += lname_len;
-    capitalize_input (lname, read);
+    capitalize_input (lname, lname_len);
     length = 0;
 
     printf ("Birthdate (00/00/0000):\n");
@@ -763,7 +763,7 @@ byte * complete_questionaire ()
     }
 
     tot_len += bdate_len;
-    capitalize_input (bdate, read);
+    capitalize_input (bdate, bdate_len);
     length = 0;
 
     printf ("Middle School Attended:\n");
@@ -784,7 +784,7 @@ byte * complete_questionaire ()
     }
 
     tot_len += mscho_len;
-    capitalize_input (mscho, read);
+    capitalize_input (mscho, mscho_len);
     length = 0;
 
     printf ("Street you grew up on\n");
@@ -806,7 +806,7 @@ byte * complete_questionaire ()
     }
  
     tot_len += street_len;
-    capitalize_input (street, read);
+    capitalize_input (street, street_len);
     length = 0;
 
     printf ("Social Security Number (xxx-xx-xxxx):\n");
@@ -829,7 +829,7 @@ byte * complete_questionaire ()
     }
 
     tot_len += ssn_len;
-    capitalize_input (ssn, read);
+    capitalize_input (ssn, ssn_len);
     length = 0;
 
     combo = calloc (tot_len + 1, 1);
