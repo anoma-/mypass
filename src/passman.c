@@ -555,7 +555,10 @@ int process_request (Record *r, uint16_t actions, Record_List *rl,
             set_exlusion_chars (match, r->exclusion_chars);
 
         if (actions & DEPRECATE_ATTR)
-            deprecate_record (match);
+        {
+            if (deprecate_record (match) != 0)
+                return failure;
+        }
 
         if (actions & DEPRECATE_SET)
             match->dep_counter = r->dep_counter;
