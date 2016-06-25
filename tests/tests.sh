@@ -8,4 +8,5 @@ cd tests &&
 ./test_deprecation.sh &&
 ./test_known_generation.sh &&
 ./test_same_new_user_input.sh
-
+rm ./mypass
+rm ./testing
