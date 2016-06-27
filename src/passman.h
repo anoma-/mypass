@@ -31,7 +31,7 @@ char * get_delimeter (byte *hashed_password);
 
 int print_record_password (Record *r, byte *user_salt, byte *password_hashed);
 
-int list_aliases (Record_List *rl);
+int list_aliases (Record_List *rl, Record *r);
 
 void print_help ();
 

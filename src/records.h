@@ -8,6 +8,7 @@ struct Record {
     char *exclusion_chars;
     char *mandatory_chars;
     char *stored_password;
+    int total_length;
     uint8_t flags;
     uint8_t pass_length;
     uint8_t dep_counter;
@@ -16,6 +17,7 @@ struct Record {
 struct Record_List {
     struct Record **record_list;
     int record_count;
+    int total_length;
 };
 
 /*  Free a single record */
@@ -24,6 +26,7 @@ void free_record (Record *r);
 Record * new_record ();
 
 char * write_records_to_buffer (Record_List *rl, char *delimeter);
+char * _write_records_to_buffer (Record_List *rl, char *delimeter);
 
 int add_record (Record_List *rl, Record *r);
 
@@ -36,6 +39,9 @@ void free_record_list (Record_List *rl);
 
  /* Fill out an entire record list, with each record deliminated */ 
 Record_List * get_record_list_from_buffer (char *records, size_t record_size,  char *delimeter);
+
+ /* Fill out an entire record list, with each record deliminated */ 
+Record_List * _get_record_list_from_buffer (char *records, size_t record_size,  char *delimeter);
 
 /*  Remove an existing exclusion char, or just unflag it */
 int rm_exclusion_chars (Record *r);

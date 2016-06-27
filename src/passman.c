@@ -309,10 +309,34 @@ int print_record_password (Record *r, byte *user_salt, byte *password_hashed)
     return failure;
 }
 
-int list_aliases (Record_List *rl)
+int list_aliases (Record_List *rl, Record *r)
 {
     ASSERT(rl, "Null arguments\n");
     int failure = 1;
+	if (r->alias)
+	{
+		Record *match = match_record_with_alias (rl, r->alias);
+		if (!match)
+		{
+			fprintf (stderr, "Error: Did not match alias: %s\n", r->alias);
+			return failure;
+		}
+		if (match->stored_password && (match->flags & STORED_PASSWORD_FLAG))
+		{
+			printf ("%s\nLength: %d\nPassword: %s\n", match->alias, match->pass_length, match->stored_password);
+			return 0;
+		}
+		printf ("%s\n", match->alias);
+		printf ("Length: %d\n", (int) match->pass_length);
+		printf ("Deprecation count: %d\n", match->dep_counter);
+
+		if (match->exclusion_chars && (match->flags & EXCLUSION_FLAG))
+			printf ("Excluding: %s\n", match->exclusion_chars);
+		if (match->mandatory_chars && (match->flags & MANDATORY_FLAG))
+			printf ("Appending: %s\n", match->mandatory_chars);
+
+		return 0;
+	}
     int i       = 0;
 
     for (i = 0; i < rl->record_count; i++)
@@ -361,7 +385,7 @@ void print_help ()
     printf ("                         alphabetic letters. Any [chars] list will overwrite an\n");
     printf ("                         older [chars] list, including an empty list\n");
     printf ("                         do note, optional args must touch flag -eexample\n");
-    printf ("  --exclude=chars\n");
+    printf ("  --exclude=[chars]\n");
     printf ("  -i (password)        import (password) for selection. Will not generate a\n");
     printf ("                         password just returns the imported (password) when\n"); 
     printf ("                         (alias) is entered. Cannot alter the records, just use\n");
@@ -369,8 +393,10 @@ void print_help ()
     printf ("  --import=password\n");
     printf ("  -f (fullpathname)    use (fullpathname) for the database instead of default\n");
     printf ("  --file=path\n");
-    printf ("  -l                   list all aliases in the database\n");
-    printf ("  --list\n");
+    printf ("  -l[alias]            without optional alias, list all aliases in the database\n");
+    printf ("                         with [alias] it will print the options listed for that\n");
+    printf ("                         specific alias entry\n");
+    printf ("  --list=[alias]\n");
     printf ("  -n[o]                complete questionaire and create a new database\n");
     printf ("                         will not overwrite existing database without\n");
     printf ("                         including optional character argument 'o'\n");
@@ -455,7 +481,7 @@ int write_changes_to_disk (Record_List *rl, User_Account *user, Crypt *crypt)
      */
     size_t min_db_size = 10240 - 1024 - 32 - 16;
     size_t db_size     = 0;
-    char *db_buf = write_records_to_buffer (rl, crypt->delimeter);
+    char *db_buf = _write_records_to_buffer (rl, crypt->delimeter);
     if (!db_buf)
     {
         fprintf (stderr, "Error: Could not write changes\n");
@@ -513,7 +539,7 @@ int process_request (Record *r, uint16_t actions, Record_List *rl,
     ASSERT((r && rl && actions && user && crypt), "Null arguments\n");
     
     if (actions & LIST_ALIASES_ACTION)
-        return list_aliases (rl);
+        return list_aliases (rl, r);
 
     if (actions & NO_ADD_ALIAS_ACTION)
         return print_record_password (r, user->user_salt, 
@@ -555,10 +581,10 @@ int process_request (Record *r, uint16_t actions, Record_List *rl,
             set_exlusion_chars (match, r->exclusion_chars);
 
         if (actions & DEPRECATE_ATTR)
-        {
+		{
             if (deprecate_record (match) != 0)
-                return failure;
-        }
+				return failure;
+		}
 
         if (actions & DEPRECATE_SET)
             match->dep_counter = r->dep_counter;

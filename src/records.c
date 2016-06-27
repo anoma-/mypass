@@ -1,4 +1,4 @@
-/* mypass a deterministic password generator
+/* /ypass a deterministic password generator
 * Copyright (C) <2016>  <Tyler Stafos>
 *
 * This program is free software: you can redistribute it and/or modify
@@ -112,6 +112,80 @@ Record * cpy_record (Record *_r)
     return r;
 }
 
+/*  Return length of a record or 0 on failure */
+int count_record_length (Record *r)
+{
+	int failure = 0;
+	int length  = 0;
+
+	if (!r)
+		return failure;
+	if (!r->alias)
+		return failure;
+
+	length += strlen (r->alias);
+	length += 1;
+	length += 3;
+	length += 1;
+	if (r->mandatory_chars && (r->flags & MANDATORY_FLAG))
+		length += strlen (r->mandatory_chars) + 1;
+	if (r->exclusion_chars && (r->flags & EXCLUSION_FLAG))
+		length += strlen (r->exclusion_chars) + 1;
+	if (r->stored_password && (r->flags & STORED_PASSWORD_FLAG))
+		length += strlen (r->stored_password) + 1;
+	r->total_length = length;
+	return length;
+}
+
+char * _write_records_to_buffer (Record_List *rl, char *delimeter)
+{
+	char *failure = NULL;
+	char *rec_buf = NULL;
+	int   rec     = 0;
+	char  del     = (char) 0xff;
+
+    rec_buf = malloc ((rl->record_count * MAX_RECORD_LENGTH) + 
+                      (16 + 1));
+	if (!rec_buf)
+	{
+		fprintf (stderr, "%s\n", Error_Memory);
+		return failure;
+	}	
+	/*  For strncat */
+	rec_buf[0] = '\0';
+	strncat (rec_buf, delimeter, strlen (delimeter));
+
+	for (rec = 0; rec < rl->record_count; rec++)
+	{
+		Record *r         = rl->record_list[rec];
+
+		strncat (rec_buf, r->alias, strlen (r->alias));
+        strncat (rec_buf, &del, 1);
+        strncat (rec_buf,(char*) &r->flags, 1);
+        strncat (rec_buf, (char*) &r->pass_length, 1);
+        strncat (rec_buf, (char*) &r->dep_counter, 1);
+        strncat (rec_buf, &del, 1);
+        if ((r->flags & EXCLUSION_FLAG) && r->exclusion_chars)  
+        {
+            strncat (rec_buf, r->exclusion_chars, strlen (r->exclusion_chars));     
+            strncat (rec_buf, &del, 1);
+        }
+        if ((r->flags & MANDATORY_FLAG) && r->mandatory_chars)  
+        {
+            strncat (rec_buf, r->mandatory_chars, strlen (r->mandatory_chars));     
+            strncat (rec_buf, &del, 1);
+        }   
+        if ((r->flags & STORED_PASSWORD_FLAG) && r->stored_password)    
+        {
+            strncat (rec_buf, r->stored_password, strlen (r->stored_password));     
+            strncat (rec_buf, &del, 1);
+        }   
+	}
+    strncat (rec_buf, delimeter, strlen (delimeter));
+
+	return rec_buf;
+}
+
 char * write_records_to_buffer (Record_List *rl, char *delimeter)
 {
     char *failure = NULL;
@@ -186,6 +260,7 @@ Record * load_record_from_token (char *record_buf)
     int         alias_length     = 0;
     int         exclusion_length = 0;
     int         mandatory_length = 0;
+	int 		total_length     = 0;
 
     char field_del[2];
     memset (&field_del[0], 255, 1);
@@ -314,7 +389,17 @@ Record * load_record_from_token (char *record_buf)
         }
         memcpy (r->stored_password, field_token, strlen (field_token));
     }
-
+	/*  Add value of the delimeter */
+	if (mandatory_length)
+		mandatory_length++;	
+	/*  Add value of the delimeter */
+	if (exclusion_length)
+		exclusion_length++;
+	/*  Add length of stored password plus delimeter */
+	if (r->stored_password)
+		total_length += r->pass_length + 1;
+	total_length = alias_length + 1 + 3 + 1 + exclusion_length + mandatory_length;
+	r->total_length = total_length;
     return r;
 }   
 
@@ -337,6 +422,70 @@ void free_record_list (Record_List *rl)
     free (rl);
     rl = NULL;
 }
+/*  Parse the buffer between crypt->delimeter and crypt->delimeter */
+Record_List * _get_record_list_from_buffer (char *db_buf, size_t db_size, char *delimeter)
+{
+    token_t *records_token = Token_tokenize ((byte*) db_buf, db_size, 
+                                  delimeter, strlen (delimeter));
+	size_t records_size  = 0;
+	char *records        = NULL;
+	Record_List *failure = NULL;
+
+	if (!records_token)
+		return failure;
+
+	Record_List *rl = malloc (sizeof (Record_List));
+	if (!rl)
+	{
+		fprintf (stderr, "%s\n", Error_Memory);
+        Token_free (records_token);
+		return failure;
+	}
+
+	size_t offset       = 0;
+	rl->record_count    = 0;
+	rl->record_list     = NULL;
+	if (records_token->list_size)
+	{
+		records = records_token->token_list[records_token->list_size-1];
+		records_size  = strlen (records);
+	}
+
+	while (offset < records_size)
+	{
+		/*  Load the offsetted record buffer into the load_from_token function 
+			reading the total length of the Record from the return of the function
+			if it returns a valid function, grow the record_list and increment the 
+			count 
+		 */
+		Record *current = load_record_from_token (&records[offset]);
+		if (current)
+		{
+			offset += current->total_length; 
+			rl->record_count++;
+			Record **temp = realloc (rl->record_list, sizeof (Record*) * rl->record_count);
+			if (temp)
+				rl->record_list = temp;
+			else
+			{
+				fprintf (stderr, "%s\n", Error_Memory);
+				free_record_list (rl);
+                Token_free (records_token);
+				return failure;
+			}
+			rl->record_list[rl->record_count - 1] = current;
+		}
+		else
+		{
+			fprintf (stderr, "Error: Failure to parse database\n");
+			free_record_list (rl);	
+            Token_free (records_token);
+			return failure;
+		}
+	}
+    Token_free (records_token);
+	return rl;
+}
 
 Record_List * get_record_list_from_buffer (char *records, size_t records_size, 
                                            char *delimeter)
@@ -348,14 +497,9 @@ Record_List * get_record_list_from_buffer (char *records, size_t records_size,
     int i                   = 0;
     int j                   = 0;
     
+
     record_list = Token_tokenize ((byte*) records, records_size, 
                                   delimeter, strlen (delimeter));
-
-    if (!record_list)
-    {
-        fprintf (stderr, "Error: Failed to parse records\n");
-        return failure;
-    }
     
     rl = calloc (1, sizeof (Record_List));
     if (!rl)
@@ -574,6 +718,7 @@ int add_record (Record_List *rl, Record *r)
         fprintf (stderr, "Error: Failed to copy record to database\n");
         return failure;
     }
+	rl->total_length += count_record_length (rl->record_list[rl->record_count -1]);
     return 0;
 }
 
@@ -582,6 +727,7 @@ int remove_record (Record_List *rl, char *alias)
     ASSERT((rl && alias), "Null args\n");
     int i       = 0;
     int j       = 0;
+	int rec_len = 0;
     uint8_t f   = 0;
 
     for (i = 0; i < rl->record_count; i++) 
@@ -591,6 +737,7 @@ int remove_record (Record_List *rl, char *alias)
         
         else if (strcmp (alias, rl->record_list[i]->alias) == 0)
         {
+			rec_len = count_record_length (rl->record_list[i]);
             free_record (rl->record_list[i]);
             f = 1;
             j = i;
@@ -599,5 +746,7 @@ int remove_record (Record_List *rl, char *alias)
     }
     if (f)
         rl->record_count--;
+
+	rl->total_length -= rec_len;
     return f ^ 1;
 }

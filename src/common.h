@@ -2,7 +2,8 @@
 #define __COMMON_H__
 #include <stdint.h>
 #include <stdlib.h>
-static const int DEFAULT_RELATIVE_PATH_LENGTH  = 12;
+#define MYPASS_VERSION "1.0\n"
+static const int DEFAULT_RELATIVE_PATH_LENGTH  = 11;
 static const int MAX_RECORD_LENGTH            = 135;
 
 static const uint16_t NEW_ACCOUNT_ACTION    = 0x001;

@@ -100,13 +100,20 @@ token_t * Token_tokenize (const unsigned char *stream, size_t s_len,
                  *  s_offset is the size of the substring */
                 /*  Allocate the list of tokens size  */
                 errno = 0;
-                t->token_list = realloc (t->token_list, 
-                                        (t->list_size + 1) * sizeof (char *));
-                if (t->token_list == NULL)
+                if (t->list_size < 0)
+                {
+                    fprintf (stderr, "Error: list_size is a negative number\n");
+                    goto cleanup;
+                }
+                char **temp = realloc (t->token_list,
+                                       (t->list_size + 1) * sizeof (char *));
+                if (temp == NULL)
                 {
                     perror ("util.c: Token_tokenize: Error allocating memory");
                     goto cleanup;
                 }
+                t->token_list = temp;
+
                 /*  allocate for string + \0 */
                 t->token_list[t->list_size] = calloc (1, s_offset+1); 
                 errno = 0;

@@ -14,7 +14,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <getopt.h>
 #include "common.h"
 #include "util.h"
@@ -24,7 +23,7 @@
 
 void print_version ()
 {
-    printf ("0.9\n");
+    printf (MYPASS_VERSION);
 }
 
 int main (int argc, char **argv)
@@ -55,7 +54,7 @@ int main (int argc, char **argv)
     static struct option long_options[] = {
         { "add",           required_argument, 0, 'a'},
         { "get",           required_argument, 0, 'g'},
-        { "list",          no_argument,       0, 'l'},
+        { "list",          optional_argument, 0, 'l'},
         { "length",        required_argument, 0, 'L'},
         { "new",           optional_argument, 0, 'n'},
         { "xget",          required_argument, 0, 'x'},
@@ -72,7 +71,7 @@ int main (int argc, char **argv)
     };
     /*  Initialize deprecation counter to 1 */
     r->dep_counter = 1;
-    while ((c = getopt_long (argc, argv, "vldhL:p:a:g:f:x:s:r:m::e::i:D:n::", long_options, &option_index)) != -1)
+    while ((c = getopt_long (argc, argv, "vdhL:p:a:g:f:x:s:r:m::e::i:D:n::l::", long_options, &option_index)) != -1)
     {
         switch (c)
         {
@@ -227,6 +226,17 @@ int main (int argc, char **argv)
                 break;
 
             case 'l' :
+				if (optarg)
+				{
+					if (r->alias)
+					{
+						fprintf (stderr, "Error: Only one operation per alias\n");
+						goto cleanup;
+					}
+					opt_len = strlen (optarg);
+					r->alias = calloc (opt_len + 1, 1);
+				   	memcpy (r->alias, optarg, opt_len);	
+				}
                 actions |= LIST_ALIASES_ACTION;
                 break;
 
@@ -251,7 +261,7 @@ int main (int argc, char **argv)
                 r->dep_counter = get_uint (optarg);
                 if (r->dep_counter == 0)
                 {
-                    fprintf (stderr, "Error: Deprecation min 1 Max 255\n");
+                    fprintf (stderr, "Error: Deprecation min 1 Max 254\n");
                     goto cleanup;
                 }
                 if (r->dep_counter == 255)  
@@ -403,7 +413,7 @@ int main (int argc, char **argv)
             goto cleanup;
         }
 
-        char def_path[] = "/.mypass/.db";
+        char def_path[] = "/.mypass/db";
         int path_len = strlen (home);
         path_len += strlen (def_path);
         user->db_path = calloc (path_len + 1, 1);
@@ -472,7 +482,7 @@ int main (int argc, char **argv)
             goto cleanup;
         }
 
-        rl = get_record_list_from_buffer (dec_db, user->db_size,  
+        rl = _get_record_list_from_buffer (dec_db, user->db_size,  
                                           crypt->delimeter);    
         if (!rl)
         {
