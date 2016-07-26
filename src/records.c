@@ -143,7 +143,7 @@ char * _write_records_to_buffer (Record_List *rl, char *delimeter)
 	char *rec_buf = NULL;
 	int   rec     = 0;
 	char  del     = (char) 0xff;
-
+    /*  Get a buffer at maximum length, plus the delimeters and NULL */
     rec_buf = malloc ((rl->record_count * MAX_RECORD_LENGTH) + 
                       (16 + 1));
 	if (!rec_buf)
@@ -153,8 +153,9 @@ char * _write_records_to_buffer (Record_List *rl, char *delimeter)
 	}	
 	/*  For strncat */
 	rec_buf[0] = '\0';
+    /*  Add the Delimeter to the record buffer */
 	strncat (rec_buf, delimeter, strlen (delimeter));
-
+    /*  Add each record and field delimeter, and field to the record buffer */
 	for (rec = 0; rec < rl->record_count; rec++)
 	{
 		Record *r         = rl->record_list[rec];
@@ -181,11 +182,13 @@ char * _write_records_to_buffer (Record_List *rl, char *delimeter)
             strncat (rec_buf, &del, 1);
         }   
 	}
+    /*  Add the Delimeter to the end of the entries */
     strncat (rec_buf, delimeter, strlen (delimeter));
 
 	return rec_buf;
 }
-
+/*
+ *  Deprecated 
 char * write_records_to_buffer (Record_List *rl, char *delimeter)
 {
     char *failure = NULL;
@@ -233,6 +236,7 @@ char * write_records_to_buffer (Record_List *rl, char *delimeter)
     }
     return rec_buf;
 }
+*/
 
 Record * match_record_with_alias (Record_List *rl, char *alias)
 {
@@ -423,10 +427,11 @@ void free_record_list (Record_List *rl)
     rl = NULL;
 }
 /*  Parse the buffer between crypt->delimeter and crypt->delimeter */
-Record_List * _get_record_list_from_buffer (char *db_buf, size_t db_size, char *delimeter)
+Record_List * _get_record_list_from_buffer (char *db_buf, size_t db_size, 
+                                            char *delimeter)
 {
     token_t *records_token = Token_tokenize ((byte*) db_buf, db_size, 
-                                  delimeter, strlen (delimeter));
+                                             delimeter, strlen (delimeter));
 	size_t records_size  = 0;
 	char *records        = NULL;
 	Record_List *failure = NULL;
@@ -487,6 +492,7 @@ Record_List * _get_record_list_from_buffer (char *db_buf, size_t db_size, char *
 	return rl;
 }
 
+/*  Deprecated 
 Record_List * get_record_list_from_buffer (char *records, size_t records_size, 
                                            char *delimeter)
 {
@@ -542,6 +548,7 @@ Record_List * get_record_list_from_buffer (char *records, size_t records_size,
     Token_free (record_list);
     return rl;
 }
+*/
 
 int rm_exclusion_chars (Record *r)
 {
@@ -730,8 +737,10 @@ int remove_record (Record_List *rl, char *alias)
 	int rec_len = 0;
     uint8_t f   = 0;
 
+    /*  If we remove a record, move all other records down the line */
     for (i = 0; i < rl->record_count; i++) 
     {
+        /*  f will be 1 if we find a matching record to remove */
         if (f)
             rl->record_list[j++] = rl->record_list[i];
         

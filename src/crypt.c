@@ -106,7 +106,8 @@ byte * get_var_len_hash (byte *seed, size_t seed_length, size_t bytes_requested)
 byte * enc_buffer (byte *input, size_t input_length, byte *key_hash_128)
 {
     byte *failure = NULL;
-    int output_length = input_length + 2 * AES_BLOCK_SIZE;
+    /*  Add the 32 bytes into the input length */
+    int output_length = input_length + (2 * AES_BLOCK_SIZE);
 
     byte *output = calloc (output_length + 1, 1);   
     if (!output)

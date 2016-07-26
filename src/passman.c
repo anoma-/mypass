@@ -481,17 +481,22 @@ int write_changes_to_disk (Record_List *rl, User_Account *user, Crypt *crypt)
      */
     size_t min_db_size = 10240 - 1024 - 32 - 16;
     size_t db_size     = 0;
+    /*  Write the records to a buffer */
     char *db_buf = _write_records_to_buffer (rl, crypt->delimeter);
     if (!db_buf)
     {
         fprintf (stderr, "Error: Could not write changes\n");
         return failure;
     }
+    /*  Get the length of the records buffer */
     db_size = strlen (db_buf);
+    /*  Set mininum db size in increments of 10240 */
     while (db_size > min_db_size)
         min_db_size += 10240;
+    /*  Add the 16 bytes for user salt back into the min size */
     min_db_size += 1024 + 16;
 
+    /*  Get random seed for salt */
     byte rnd[16];
     if (!(RAND_bytes (rnd, 16)))
     {
@@ -499,6 +504,7 @@ int write_changes_to_disk (Record_List *rl, User_Account *user, Crypt *crypt)
         return failure;
     }
 
+    /*  Get a hash of the random salt at length of min db size */
     byte *dec_db = get_var_len_hash (rnd, 16, min_db_size);
     if (!dec_db)
     {
@@ -506,11 +512,13 @@ int write_changes_to_disk (Record_List *rl, User_Account *user, Crypt *crypt)
         secure_free (db_buf, db_size);
         return failure;
     }
-
+    /*  At the start position, copy the user salt into the db buffer */
     memcpy (&dec_db[crypt->start], user->user_salt, 16);
+    /*  Then copy the db buffer, overwriting the stretched random salt */
     memcpy (&dec_db[crypt->start + 16], db_buf, db_size);
 
-    /*  This step adds 32 bytes to the buffer */
+    /*  This step adds 32 bytes to the buffer, and encrypts with cbc */
+    /*  The random salt stretched acts as the explicit IV */
     byte *encrypted_db = enc_buffer (dec_db, min_db_size, crypt->password_hashed);
     if (!encrypted_db)
     {
@@ -524,7 +532,7 @@ int write_changes_to_disk (Record_List *rl, User_Account *user, Crypt *crypt)
 
     ASSERT(((min_db_size + 32) % 10240 == 0), 
             "Min db size is not a product of 10240\n");
-
+    /*  Write the encrypted buffer to disk */
     rt_val = write_buf_to_disk (user->db_path, encrypted_db, min_db_size+32);   
     secure_free (encrypted_db, min_db_size + 32);
     return rt_val;
