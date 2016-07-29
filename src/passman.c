@@ -1100,3 +1100,115 @@ int sanitize_input (byte *input, size_t input_len)
     }
     return 0;
 }
+
+/*  Open file ~/.mypass/key and read the password from it
+ *  The file must have correct permissions, following in 
+ *  example of ssh keys.
+*/ 
+int get_password_from_file (char **password, char *home)
+{
+    int failure = 1;
+    int success = 0;
+    int rt = 0;
+    if (!home)
+        return failure;
+
+    FILE  *fp = NULL;
+    struct stat stats;
+    long   pass_size = 0;
+    size_t size = 0;
+    size_t path_len = strlen (home);
+    char   apnd[] = "/.mypass/key";
+    size_t apnd_len = strlen (apnd);
+    char  *path = calloc (1, path_len + apnd_len + 1);
+
+    /*  Get full path name of key file */
+    strncat (path, home, path_len);
+    strncat (path, apnd, apnd_len); 
+
+    if (!path)
+    {
+        fprintf (stderr, "Error: could not get path name to key\n");
+        return failure;
+    }
+    errno = 0;
+    fp = fopen (path, "r");
+    if (!fp)
+    {
+        perror ("Error: Could not open key file\n");
+        free (path);
+        return failure;
+    }
+    errno = 0;
+    rt = stat (path, &stats);
+    if (rt != 0)
+    {
+        perror ("Error: Could not get stats on key file\n");
+        fclose (fp);
+        free (path);
+        return failure;
+    }
+    /*  If permissions are anything except 0400 or read only by owner; fail */
+    if (0 != (stats.st_mode & S_IWUSR) || // User write
+        0 != (stats.st_mode & S_IXUSR) || // User exec
+        0 != (stats.st_mode & S_IWGRP) || // Grp write
+        0 != (stats.st_mode & S_IRGRP) || // Grp read
+        0 != (stats.st_mode & S_IXGRP) || // Grp exec
+        0 != (stats.st_mode & S_IROTH) || // other read
+        0 != (stats.st_mode & S_IWOTH) || // other write
+        0 != (stats.st_mode & S_IXOTH)  ) // other exec
+    {
+        fprintf (stderr, "Error: Bad permissions for key file\n");
+        fprintf (stderr, "Must be read only by owner\n");
+        fclose (fp);
+        free (path);
+        return failure;
+    }
+    /*  Get the password size */
+    errno = 0;
+    fseek (fp, 0L, SEEK_END);
+    pass_size = ftell (fp);
+    
+    if (pass_size < 0)
+    {
+       perror ("Error: Could not read key file size\n");
+       return failure;
+    }
+    if (pass_size == 0)
+    {
+        fprintf (stderr, "Error: Could not read key file, or it is empty\n");
+        fclose (fp);
+        free (path);
+        return failure;
+    }
+    /*  Cast to size_t after checking not 0 or < 0 */
+    size = (size_t) pass_size;
+    
+    /*  Finally get memory for the password size */
+    rewind (fp);
+    if (!(*password = calloc (1, size + 1)))
+    {
+        fprintf (stderr, "%s\n", Error_Memory);
+        fclose (fp);
+        free (path);
+        return failure;
+    }
+    /*  And read the password */
+    if ((fread (*password, 1, size, fp) != size))
+    {
+        perror ("Error: Could not read key file\n");
+        fclose (fp);
+        free (path);
+        free (*password);
+        *password = NULL;
+        return failure;
+    }     
+    if ((*password)[size -1] == '\n')
+    {
+        (*password)[size-1] = '\0';
+    }
+
+    fclose (fp);
+    free (path);
+    return success;
+}

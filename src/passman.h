@@ -6,6 +6,8 @@
 #include "crypt.h"
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 struct User_Account {
     size_t db_size;
@@ -50,4 +52,5 @@ byte * get_user_salt (byte *dec_db, int start_position);
 
 int sanitize_input (byte *input, size_t input_len);
 
+int get_password_from_file (char **password, char *home);
 #endif

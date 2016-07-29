@@ -403,7 +403,8 @@ int main (int argc, char **argv)
         }
 
     }
-
+    /*  If no file path for the db is given, get and set the path with 
+     *  the $HOME variable */
     if (!user->db_path)
     {
         char *home = getenv ("HOME");
@@ -426,7 +427,7 @@ int main (int argc, char **argv)
         strcat (user->db_path, def_path);
     }
 
-    
+    /*  If we are creating a new account */ 
     if ((actions & NEW_ACCOUNT_ACTION) == NEW_ACCOUNT_ACTION)
     {
         rt_val = create_account (user->db_path, overwrite);
@@ -435,13 +436,27 @@ int main (int argc, char **argv)
         free_user_account (user);
         return rt_val;
     }
+    /*  And everything else */
     else if (r->alias || (actions & LIST_ALIASES_ACTION)) 
     {
         if (!crypt->password)
         {
-            fprintf (stderr, "Error: No password supplied.");
-            fprintf (stderr, " Cannot process request\n");
-            goto cleanup;
+            if ((get_password_from_file (&crypt->password, 
+                 getenv ("HOME"))) != 0)
+            {
+                fprintf (stderr, "Error: Failed to get password\n");
+                goto cleanup;
+            }
+
+            crypt->password_hashed = get_var_len_hash ((byte*)crypt->password, 
+                                                      strlen (crypt->password), 
+                                                      16);
+            if (!crypt->password_hashed)
+            {
+                fprintf (stderr, "Error: Could not get hash\n");
+                goto cleanup;
+            }
+
         }
         db_buffer = get_db_buffer (user);   
         if (!db_buffer)

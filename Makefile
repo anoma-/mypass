@@ -8,6 +8,9 @@ MCK=-O1 -g -fsanitize=address -fno-omit-frame-pointer
 default:
 	$(CC) $(FLAGS) $(SOURCES) $(LINK_AES) -o $(NAME)
 
+debug:
+	$(CC) -g $(FLAGS) $(SOURCES) $(LINK_AES) -o $(NAME)
+
 install:
 	mv $(NAME) /usr/local/bin
 
