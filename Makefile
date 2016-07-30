@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -pedantic -std=c99 -fstack-protector-strong -Wextra
+FLAGS=-Wall -pedantic -std=c99 -fstack-protector-all -Wextra -D_FORTIFY_SOURCE=2 -fPIE
 LINK_AES=-lcrypto
 SOURCES=src/main.c src/crypt.c src/util.c src/records.c src/passman.c src/skein/skein.c src/skein/skein_block.c
 NAME=mypass
@@ -16,3 +16,4 @@ install:
 
 memcheck:
 	clang $(MCK) $(SOURCES) $(LINK_AES) -o test
+

@@ -26,6 +26,7 @@ secure_free (void *ptr, size_t ptr_size)
     clear_memory (ptr, 0, ptr_size);
     free (ptr);
 }
+
 /*  Helper functions:
     Find first byte occurance of the delimeter, and then check the 
     rest of the delimeter */
@@ -191,7 +192,7 @@ int main (int argc, char** argv)
 */  
 
 /*  Clear a segment of memory */
-void *clear_memory (void *v, int c, size_t n)
+void * clear_memory (void *v, int c, size_t n)
 {
     volatile unsigned char *p = v;
     while (n--)
