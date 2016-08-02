@@ -1,8 +1,0 @@
-0.91
-database "$HOME/.mypass/.db" now "$HOME/.mypass/db"
-fixed capitalization bug
-
-0.92
-Added support for password file at "$HOME/.mypass/key" 
-fixed import password length bug
-TODO complete support for password file with -f --file flag
