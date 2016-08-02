@@ -402,7 +402,10 @@ Record * load_record_from_token (char *record_buf)
 	/*  Add length of stored password plus delimeter */
 	if (r->stored_password)
 		total_length += r->pass_length + 1;
-	total_length = alias_length + 1 + 3 + 1 + exclusion_length + mandatory_length;
+    /*  add all the lengths up, plus del, flag, del */
+	total_length += alias_length + 1 + 3 + 1 + 
+                    exclusion_length + 
+                    mandatory_length;
 	r->total_length = total_length;
     return r;
 }   

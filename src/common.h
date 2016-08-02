@@ -2,7 +2,7 @@
 #define __COMMON_H__
 #include <stdint.h>
 #include <stdlib.h>
-#define MYPASS_VERSION "1.0\n"
+#define MYPASS_VERSION "0.92\n"
 static const int DEFAULT_RELATIVE_PATH_LENGTH  = 11;
 static const int MAX_RECORD_LENGTH            = 135;
 
@@ -20,7 +20,7 @@ static const uint16_t SET_MANDATORY_ATTR    = 0x100;
 static const uint16_t SET_EXCLUSION_ATTR    = 0x200;
 static const uint16_t IMPORT_PASS_ATTR      = 0x400;
 static const uint16_t DEPRECATE_ATTR        = 0x800;
-static const uint16_t DEPRECATE_SET         = 0x1000;
+static const uint16_t DEPRECATE_SET        = 0x1000;
 
 static const int NUM_HASHES                = 200000;
 
