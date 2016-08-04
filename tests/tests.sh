@@ -11,3 +11,4 @@ cd tests &&
 ./test_import.sh
 rm ./mypass
 rm ./testing
+rm ./key
