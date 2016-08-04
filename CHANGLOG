@@ -1,0 +1,4 @@
+V0.92 -> V0.93
+
+Added a password file "/path_to_db/key", so that the -p --password flag is unnecessary
+
