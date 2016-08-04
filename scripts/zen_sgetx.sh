@@ -7,11 +7,7 @@ sshuser=
 if [[ "x$sshuser" != "x" ]]; then 
   alias=$(zenity --entry --title="Enter Alias" --text="Enter the alias") 
   if [[ ! -z $alias:+x ]]; then
-    pass=$(zenity --password)
-
-    if [[ ! -z $pass:+x ]]; then
-      echo $(ssh "$sshuser" mypass -g$alias -p$pass) | xclip -selection clipboard
-    fi
+    echo $(ssh "$sshuser" mypass -g$alias -p$pass) | xclip -selection clipboard
   fi
 else
   echo "Have not set ssh user"
