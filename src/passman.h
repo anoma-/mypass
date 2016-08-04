@@ -52,5 +52,7 @@ byte * get_user_salt (byte *dec_db, int start_position);
 
 int sanitize_input (byte *input, size_t input_len);
 
-int get_password_from_file (char **password, char *home);
+int get_password_from_file (char **password, char *db_path);
+
+int write_password_key_file (char *password, char *db_path, uint8_t overwrite);
 #endif

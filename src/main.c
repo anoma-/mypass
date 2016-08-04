@@ -442,7 +442,7 @@ int main (int argc, char **argv)
         if (!crypt->password)
         {
             if ((get_password_from_file (&crypt->password, 
-                 getenv ("HOME"))) != 0)
+                 user->db_path) != 0))
             {
                 fprintf (stderr, "Error: Failed to get password\n");
                 goto cleanup;

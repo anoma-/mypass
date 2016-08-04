@@ -46,9 +46,7 @@ The first action to get started is to make a new account
 
 This will initiate the questionaire, and ask for a password at the end. The password is your master password, and the questionaire as mentioned before will be used to add psuedo entropy to the password generator. If you enter the same information every time, it will produce the conditions to generate the same password for each *alias* every time.  
 
-The master password can be passed as a flag with the -p flag. However, all processes running, can read arguments passed to other processes. In a multi user environment, this means another user can read your master password. So, instead you may enter your password in a text file, in the $HOME/.mypass directory. The filename should be called "key" and must have permissions of 400 or User Read Only.
-
-So with the master password key file set at 400, and with the same password you entered at the end of the questionaire.
+The master password can be passed as a flag with the -p flag. However, all processes running, can read arguments passed to other processes. In a multi user environment, this means another user can read your master password. So, instead you may enter your password in a text file, in the $HOME/.mypass directory. The filename should be called "key" and must have permissions of User Only (700 600 400). The file will be created by default on creation of a new database.
 
 >**mypass -a myemailaddress**
 

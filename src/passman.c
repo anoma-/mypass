@@ -941,6 +941,14 @@ int create_account (char *db_path, uint8_t overwrite)
         return failure;
     }
 
+    if (write_password_key_file (password, db_path, overwrite) != 0)
+    {
+        fprintf (stderr, "Error: Could not create password key file\n");
+        secure_free (user_salt, 16);
+        secure_free (password, strlen (password));
+        return failure;
+    }
+
     if (!user_salt)
     {
         fprintf (stderr, "Error: Could not generate user salt\n");
@@ -1105,27 +1113,45 @@ int sanitize_input (byte *input, size_t input_len)
  *  The file must have correct permissions, following in 
  *  example of ssh keys.
 */ 
-int get_password_from_file (char **password, char *home)
+int get_password_from_file (char **password, char *db_path)
 {
     int failure = 1;
     int success = 0;
     int rt = 0;
-    if (!home)
+    if (!db_path)
         return failure;
 
     FILE  *fp = NULL;
     struct stat stats;
     long   pass_size = 0;
-    size_t size = 0;
-    size_t path_len = strlen (home);
-    char   apnd[] = "/.mypass/key";
-    size_t apnd_len = strlen (apnd);
-    char  *path = calloc (1, path_len + apnd_len + 1);
-
+    size_t pass_cast_size = 0;
+    size_t dbpath_len = strlen (db_path);
+    /*  Copy path size, so we can iteratively remove db name from path */
+    size_t iter = dbpath_len;
+    char c = '\0';
+    while (c != '/')
+    {
+        if (iter == 0)
+            break;
+        c = db_path[--iter];
+    }
+    /*  If we failed to find forward slash, we could not get path */
+    if (c != '/')
+    {
+        fprintf (stderr, "Error: Could not get path for key file\n");
+        return failure;
+    }
+    /*  iter + 2, iter is on index /, + 1 for size to include it + 1 null char*/
+    char key_path[iter + 2];
+    /*  iter + 1 for the length to include the index iter */
+    strncpy (key_path, db_path, iter + 1);
+    key_path[iter + 2] = '\0';
+    size_t home_path_len = strlen (key_path);
+    char  *path = calloc (1, home_path_len + 4);
     /*  Get full path name of key file */
-    strncat (path, home, path_len);
-    strncat (path, apnd, apnd_len); 
-
+    strncat (path, key_path, home_path_len);
+    strncat (path, "key", 3); 
+    printf ("%s\n", path);
     if (!path)
     {
         fprintf (stderr, "Error: could not get path name to key\n");
@@ -1148,10 +1174,8 @@ int get_password_from_file (char **password, char *home)
         free (path);
         return failure;
     }
-    /*  If permissions are anything except 0400 or read only by owner; fail */
-    if (0 != (stats.st_mode & S_IWUSR) || // User write
-        0 != (stats.st_mode & S_IXUSR) || // User exec
-        0 != (stats.st_mode & S_IWGRP) || // Grp write
+    /*  If permissions are anything except 0700 or read only by owner; fail */
+    if (0 != (stats.st_mode & S_IWGRP) || // Grp write
         0 != (stats.st_mode & S_IRGRP) || // Grp read
         0 != (stats.st_mode & S_IXGRP) || // Grp exec
         0 != (stats.st_mode & S_IROTH) || // other read
@@ -1182,11 +1206,11 @@ int get_password_from_file (char **password, char *home)
         return failure;
     }
     /*  Cast to size_t after checking not 0 or < 0 */
-    size = (size_t) pass_size;
+    pass_cast_size = (size_t) pass_size;
     
     /*  Finally get memory for the password size */
     rewind (fp);
-    if (!(*password = calloc (1, size + 1)))
+    if (!(*password = calloc (1, pass_cast_size + 1)))
     {
         fprintf (stderr, "%s\n", Error_Memory);
         fclose (fp);
@@ -1194,7 +1218,7 @@ int get_password_from_file (char **password, char *home)
         return failure;
     }
     /*  And read the password */
-    if ((fread (*password, 1, size, fp) != size))
+    if ((fread (*password, 1, pass_cast_size, fp) != pass_cast_size))
     {
         perror ("Error: Could not read key file\n");
         fclose (fp);
@@ -1203,12 +1227,113 @@ int get_password_from_file (char **password, char *home)
         *password = NULL;
         return failure;
     }     
-    if ((*password)[size -1] == '\n')
+    if ((*password)[pass_cast_size -1] == '\n')
     {
-        (*password)[size-1] = '\0';
+        (*password)[pass_cast_size-1] = '\0';
     }
 
     fclose (fp);
     free (path);
+    return success;
+}
+/*  We have the db_path including db name, remove name, add key to path,
+ *  and write the file. Give permissions 0600, and be sure to not overwrite
+ *  a file */
+int write_password_key_file (char *password, char *db_path, uint8_t overwrite)
+{
+    int success = 0;
+    int failure = 1;
+    ASSERT(password, "password field is NULL\n");
+    ASSERT(db_path, "db_path is NULL\n");
+
+    size_t path_stripped_len = 0;
+    size_t file_length       = 0;
+    size_t pass_len          = 0;
+    size_t db_path_len       = strlen (db_path);
+    size_t iter              = db_path_len;
+
+    char *key_path = NULL;
+    FILE *fp       = NULL;
+
+    char c = '\0';
+    while (c != '/')
+    {
+        if (iter == 0)
+            break;
+        c = db_path[--iter];
+    }
+
+    if (c != '/')
+    {
+        fprintf (stderr, "Error: Failed to get path for key file\n");
+        return failure;
+    }
+
+    char path_stripped[iter + 2];
+    memset (path_stripped, 0, iter + 2);
+    strncpy (path_stripped, db_path, iter + 1);
+    path_stripped_len = strlen (path_stripped);
+
+    key_path = calloc (1, path_stripped_len + 3 + 1);
+    if (!key_path)
+    {
+        fprintf (stderr, "%s\n", Error_Memory);
+        return failure;
+    }
+
+    strncpy (key_path, path_stripped, path_stripped_len);
+    strncat (key_path, "key", 3);
+
+    errno = 0;
+    /*  If overwrite, write a new file "key" at dir path that is the 
+     *  same as the db_path */
+    if (overwrite)
+    {
+        fp = fopen (key_path, "w");
+        if (!fp)
+        {
+            perror ("Error: Could not open key file\n");
+            free (key_path);
+            return failure;
+        }
+    }
+    /*  Else we will open as append, and make sure we are at the beginning of 
+     *  the file... which means it did not previously exist or it was empty */
+    else
+    {
+        fp = fopen (key_path, "a");
+        if (!fp)
+        {
+            perror ("Error: Opening key file\n");
+            free (key_path);
+            return failure;
+        }
+    }
+    /*  Make sure we are at beginning of the file */
+    /*  If we are appending !overwrite, we could be at end of existing file */
+    file_length =  ftell (fp);
+    if (file_length != 0)
+    {
+        fclose (fp);
+        free (key_path);
+        fprintf (stderr, "Error: Filename \"key\", already exists\n");
+        return failure;
+    }
+    pass_len = strlen (password);
+    errno = 0;
+    if ((fwrite (password, 1, pass_len, fp) != pass_len))
+    {
+        perror ("Error: Could not write to key file\n");
+        free (key_path);
+        fclose (fp);
+        return failure;
+    }
+
+    fclose (fp);
+    errno = 0;
+    if ((chmod (key_path, S_IRUSR | S_IWUSR)) != 0)
+        perror ("Failed to set proper permissions for key file\n");
+
+    free (key_path);
     return success;
 }
