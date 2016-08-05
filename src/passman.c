@@ -1151,7 +1151,6 @@ int get_password_from_file (char **password, char *db_path)
     /*  Get full path name of key file */
     strncat (path, key_path, home_path_len);
     strncat (path, "key", 3); 
-    printf ("%s\n", path);
     if (!path)
     {
         fprintf (stderr, "Error: could not get path name to key\n");
