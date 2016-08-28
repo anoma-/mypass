@@ -69,20 +69,20 @@ This would return the full max length of the generated password, at 64 character
 
 Appending a string of characters to the end of the generated password is also possible.
 
->**mypass -g myemailaddress --mandatory=addupto18character**
+>**mypass -g myemailaddress --mandatory=addupto8**
 
 
-Would return the 64 charcter password, plus the "addupto18character" string appended to the end of it. And would also store that string in the database, and return the same password for all further --get of that alias.
+Would return the 64 charcter password, plus the "addupto8" string appended to the end of it. And would also store that string in the database, and return the same password for all further --get of that alias.
 
 >**mypass -g myemailaddress --mandatory**
 
 Would essentially append an empty string, or erase the appending characters from the database. Due to the way arguments are parsed, optional input for arguments must not have spaces between the flag and input. If you look at the --help output, you will find optional input for flags in square brackets []. So this means
 
->**mypass -g myemailaddress -m addupto18character**
+>**mypass -g myemailaddress -m addupto8**
 
-Would not work to append the string "addupto18character", but the space does work for the -g or --get flag.
+Would not work to append the string "addupto8", but the space does work for the -g or --get flag.
 
->**mypass -gmyemailaddress -maddupto18character**
+>**mypass -gmyemailaddress -maddupto8**
 
 Would work. 
 
