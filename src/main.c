@@ -504,6 +504,7 @@ int main (int argc, char **argv)
         if (!rl)
         {
             fprintf (stderr, "Error: Could not parse database\n");
+            secure_free (dec_db, user->db_size);
             free (db_buffer);
             goto cleanup;
         }
