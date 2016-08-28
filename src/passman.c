@@ -1147,7 +1147,7 @@ int get_password_from_file (char **password, char *db_path)
     char key_path[iter + 2];
     /*  iter + 1 for the length to include the index iter */
     strncpy (key_path, db_path, iter + 1);
-    key_path[iter + 2] = '\0';
+    key_path[iter + 1] = '\0';
     size_t home_path_len = strlen (key_path);
     char  *path = calloc (1, home_path_len + 4);
     if (!path)
@@ -1158,11 +1158,6 @@ int get_password_from_file (char **password, char *db_path)
     /*  Get full path name of key file */
     strncat (path, key_path, home_path_len);
     strncat (path, "key", 3); 
-    if (!path)
-    {
-        fprintf (stderr, "Error: could not get path name to key\n");
-        return failure;
-    }
     errno = 0;
     fp = fopen (path, "r");
     if (!fp)
