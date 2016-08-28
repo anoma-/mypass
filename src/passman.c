@@ -1057,6 +1057,7 @@ byte * get_db_buffer (User_Account *user)
     if (f < 0)
     {
         perror ("Error: Couldn't get file size\n");
+        fclose (fp);
         return failure;
     }
     else
@@ -1068,6 +1069,7 @@ byte * get_db_buffer (User_Account *user)
     if (!db_buf)
     {
         fprintf (stderr, "%s\n", Error_Memory);
+        fclose (fp);
         return failure;
     }
 
