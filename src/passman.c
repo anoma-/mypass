@@ -750,6 +750,7 @@ byte * complete_questionaire ()
     if ((mname_len = getline (&mname, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
         return failure;
     }
     if (mname_len <= 0)
@@ -767,6 +768,8 @@ byte * complete_questionaire ()
     if ((lname_len = getline (&lname, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
         return failure;
     }
     if (lname_len <= 0)
@@ -786,6 +789,9 @@ byte * complete_questionaire ()
     if ((bdate_len = getline (&bdate, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
         return failure;
     }
     if (bdate_len <= 0)
@@ -806,6 +812,10 @@ byte * complete_questionaire ()
     if ((mscho_len = getline (&mscho, &length, stdin)) == -1)    
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
         return failure;
     }
     if (mscho_len <= 0)
@@ -827,6 +837,11 @@ byte * complete_questionaire ()
     if ((street_len = getline (&street, &length, stdin)) == -1)   
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
+        secure_free (mscho, mscho_len);
         return failure;
     }
     if (street_len <= 0)
@@ -849,6 +864,12 @@ byte * complete_questionaire ()
     if ((ssn_len = getline (&ssn, &length, stdin)) == -1)  
     {
         fprintf (stderr, "Error: Could not read input\n");
+        secure_free (fname, fname_len);
+        secure_free (mname, mname_len);
+        secure_free (lname, lname_len);
+        secure_free (bdate, bdate_len);
+        secure_free (mscho, mscho_len);
+        secure_free (street, street_len);
         return failure;
     }
     if (ssn_len <= 0)
