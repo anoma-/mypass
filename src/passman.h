@@ -1,5 +1,6 @@
 #ifndef __PASSMAN_H__
 #define __PASSMAN_H__
+
 #include "common.h"
 #include "util.h"
 #include "records.h"
@@ -55,4 +56,5 @@ int sanitize_input (byte *input, size_t input_len);
 int get_password_from_file (char **password, char *db_path);
 
 int write_password_key_file (char *password, char *db_path, uint8_t overwrite);
+
 #endif

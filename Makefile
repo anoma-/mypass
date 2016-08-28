@@ -17,3 +17,6 @@ install:
 memcheck:
 	clang $(MCK) $(SOURCES) $(LINK_AES) -o test
 
+memfailure:
+	$(CC) -g $(SOURCES) src/mymalloc.c $(LINK_AES) -o mem_fail
+
