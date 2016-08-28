@@ -469,6 +469,7 @@ int main (int argc, char **argv)
         if (!crypt->delimeter)
         {
             fprintf (stderr, "Error: Cannot process request\n");
+            free (db_buffer);
             goto cleanup;
         }
 
@@ -476,6 +477,7 @@ int main (int argc, char **argv)
         if (!crypt->start)
         {
             fprintf (stderr, "Error: Cannot process request\n");
+            free (db_buffer);
             goto cleanup;
         }
 
