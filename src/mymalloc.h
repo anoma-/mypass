@@ -3,7 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-void * mymalloc (size_t sz);
+void * mymalloc (size_t sz, int i);
 
 #endif

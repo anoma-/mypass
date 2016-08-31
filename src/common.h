@@ -2,7 +2,7 @@
 #define __COMMON_H__
 #include <stdint.h>
 #include <stdlib.h>
-#define malloc mymalloc
+#define calloc mymalloc
 #define MYPASS_VERSION "0.93\n"
 
 static const int DEFAULT_RELATIVE_PATH_LENGTH  = 11;
