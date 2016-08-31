@@ -31,6 +31,8 @@ static const char replace[]  = "GhIjKmNpQrStUvWxYz";
 User_Account * new_user_account  ()
 {
     User_Account *act = calloc (sizeof (User_Account), 1);
+    if (!act)
+        return NULL;
     act->db_path  = NULL;
     act->user_salt = NULL;
     return act;

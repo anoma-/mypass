@@ -6,10 +6,10 @@ alloc="./src/mymalloc.c"
 report()
 {
   $command 2> valgrind_output
-  grep "lost\|reachable" valgrind_output | awk '{print $4$7}' | grep -e "[1-9]+"  && 
-    echo "***********Memory Leak ************" >> report                          &&
-    echo "$mem_failure" >> report                                                 &&
-    cat valgrind_output >> report                                                 &&
+  grep "lost\|reachable" valgrind_output | awk '{print $4$7}' | grep -e [1-9] && 
+    echo "***********Memory Leak ************" >> report                      &&
+    echo "$command" >> report                                                 &&
+    cat valgrind_output >> report                                             &&
     echo "**********************************" >> report                              
 }
 # Change the number of when to return NULL in $alloc function
@@ -48,11 +48,17 @@ test_commands[16]="./mem_fail -f./f -gnotexistant -mmandayantorye'asdf -e198395r
 test_commands[17]="./mem_fail -f./f -gnotexistant -mmand -e19"
 test_commands[18]="./mem_fail asdfasdlfkja;slkdjf;alksjdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
+fresh_db()
+{
+  ./mem_fail -f./f -no < ./tests/new_user1
+}
+
 start_tests()
 {
   cnt=${#test_commands[@]}
   let i=0
   while [[ $i -lt $cnt ]]; do
+    fresh_db
     get_num_calls "${test_commands[$i]}"
     num=${arr[0]}
     iter=0
