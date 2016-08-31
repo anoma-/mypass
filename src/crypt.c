@@ -21,6 +21,8 @@
 Crypt * new_crypt ()
 {
     Crypt *c = calloc (sizeof (Crypt), 1);
+    if (!c)
+        return NULL;
     c->start = 0;
     c->password        = NULL;
     c->password_hashed = NULL;
