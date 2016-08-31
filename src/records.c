@@ -38,6 +38,8 @@ void free_record (Record *r)
 Record * new_record ()
 {
     Record *r = calloc (sizeof (Record), 1);
+    if (!r)
+        return NULL;
     r->flags = DEFAULT_FLAG;
     r->pass_length = DEFAULT_PASS_LENGTH;
     r->dep_counter = 1;
