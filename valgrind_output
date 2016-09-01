@@ -1,20 +1,26 @@
-==460== Memcheck, a memory error detector
-==460== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
-==460== Using Valgrind-3.12.0.SVN and LibVEX; rerun with -h for copyright info
-==460== Command: ./mem_fail asdfasdlfkja;slkdjf;alksjdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-==460== 
-Error: No actions to take
-==460== 
-==460== HEAP SUMMARY:
-==460==     in use at exit: 1,792 bytes in 26 blocks
-==460==   total heap usage: 1,619 allocs, 1,593 frees, 222,322 bytes allocated
-==460== 
-==460== LEAK SUMMARY:
-==460==    definitely lost: 0 bytes in 0 blocks
-==460==    indirectly lost: 0 bytes in 0 blocks
-==460==      possibly lost: 0 bytes in 0 blocks
-==460==    still reachable: 0 bytes in 0 blocks
-==460==         suppressed: 1,792 bytes in 26 blocks
-==460== 
-==460== For counts of detected and suppressed errors, rerun with: -v
-==460== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==30412== Memcheck, a memory error detector
+==30412== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==30412== Using Valgrind-3.12.0.SVN and LibVEX; rerun with -h for copyright info
+==30412== Command: ./mem_fail -f./f -atest -iimport
+==30412== 
+==30412== 
+==30412== Process terminating with default action of signal 2 (SIGINT)
+==30412==    at 0x4F08860: ??? (in /lib/x86_64-linux-gnu/libcrypto.so.1.0.0)
+==30412==    by 0x586910F: ???
+==30412==    by 0x58818AF: ???
+==30412==    by 0x586E079: ???
+==30412==    by 0xFFEFFE35F: ???
+==30412== 
+==30412== HEAP SUMMARY:
+==30412==     in use at exit: 10,040 bytes in 59 blocks
+==30412==   total heap usage: 541 allocs, 482 frees, 96,222 bytes allocated
+==30412== 
+==30412== LEAK SUMMARY:
+==30412==    definitely lost: 0 bytes in 0 blocks
+==30412==    indirectly lost: 0 bytes in 0 blocks
+==30412==      possibly lost: 0 bytes in 0 blocks
+==30412==    still reachable: 0 bytes in 0 blocks
+==30412==         suppressed: 10,040 bytes in 59 blocks
+==30412== 
+==30412== For counts of detected and suppressed errors, rerun with: -v
+==30412== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

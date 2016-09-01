@@ -6,7 +6,7 @@ void * mymalloc (size_t sz, int num)
 {
     i++;
     printf ("%d\n", i);
-    if (i == 11
+    if ( i == 10 )
         return NULL;
     void *p = malloc (sz * num);
     memset (p, 0, sz*num);
