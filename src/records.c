@@ -170,17 +170,17 @@ char * _write_records_to_buffer (Record_List *rl, char *delimeter)
         strncat (rec_buf, &del, 1);
         if ((r->flags & EXCLUSION_FLAG) && r->exclusion_chars)  
         {
-            strncat (rec_buf, r->exclusion_chars, strlen (r->exclusion_chars));     
+            strncat (rec_buf, r->exclusion_chars, strlen (r->exclusion_chars));
             strncat (rec_buf, &del, 1);
         }
         if ((r->flags & MANDATORY_FLAG) && r->mandatory_chars)  
         {
-            strncat (rec_buf, r->mandatory_chars, strlen (r->mandatory_chars));     
+            strncat (rec_buf, r->mandatory_chars, strlen (r->mandatory_chars));
             strncat (rec_buf, &del, 1);
         }   
         if ((r->flags & STORED_PASSWORD_FLAG) && r->stored_password)    
         {
-            strncat (rec_buf, r->stored_password, strlen (r->stored_password));     
+            strncat (rec_buf, r->stored_password, strlen (r->stored_password));
             strncat (rec_buf, &del, 1);
         }   
 	}
@@ -189,56 +189,6 @@ char * _write_records_to_buffer (Record_List *rl, char *delimeter)
 
 	return rec_buf;
 }
-/*
- *  Deprecated 
-char * write_records_to_buffer (Record_List *rl, char *delimeter)
-{
-    char *failure = NULL;
-    char *rec_buf = NULL;
-    int  rec      = 0;  
-    char del      = (char) 0xff;    
-
-    rec_buf = malloc ((rl->record_count * MAX_RECORD_LENGTH) + 
-                      (8 * (rl->record_count + 1)) + 1);
-    if (!rec_buf)
-    {
-        fprintf (stderr, "%s\n", Error_Memory);
-        return failure;
-    }
-    
-    rec_buf[0] = '\0';  
-    strncat (rec_buf, delimeter, strlen (delimeter));   
-    
-
-    for (rec = 0; rec < rl->record_count; rec++)
-    {
-        Record *r = rl->record_list[rec];
-        strncat (rec_buf, r->alias, strlen (r->alias));
-        strncat (rec_buf, &del, 1);
-        strncat (rec_buf,(char*) &r->flags, 1);
-        strncat (rec_buf, (char*) &r->pass_length, 1);
-        strncat (rec_buf, (char*) &r->dep_counter, 1);
-        strncat (rec_buf, &del, 1);
-        if ((r->flags & EXCLUSION_FLAG) && r->exclusion_chars)  
-        {
-            strncat (rec_buf, r->exclusion_chars, strlen (r->exclusion_chars));     
-            strncat (rec_buf, &del, 1);
-        }
-        if ((r->flags & MANDATORY_FLAG) && r->mandatory_chars)  
-        {
-            strncat (rec_buf, r->mandatory_chars, strlen (r->mandatory_chars));     
-            strncat (rec_buf, &del, 1);
-        }   
-        if ((r->flags & STORED_PASSWORD_FLAG) && r->stored_password)    
-        {
-            strncat (rec_buf, r->stored_password, strlen (r->stored_password));     
-            strncat (rec_buf, &del, 1);
-        }   
-        strncat (rec_buf, delimeter, strlen (delimeter));
-    }
-    return rec_buf;
-}
-*/
 
 Record * match_record_with_alias (Record_List *rl, char *alias)
 {
@@ -497,64 +447,6 @@ Record_List * _get_record_list_from_buffer (char *db_buf, size_t db_size,
     Token_free (records_token);
 	return rl;
 }
-
-/*  Deprecated 
-Record_List * get_record_list_from_buffer (char *records, size_t records_size, 
-                                           char *delimeter)
-{
-    ASSERT(records && delimeter, "Null arguments\n");
-    Record_List *failure    = NULL;
-    Record_List *rl         = NULL;
-    token_t *record_list    = NULL;
-    int i                   = 0;
-    int j                   = 0;
-    
-
-    record_list = Token_tokenize ((byte*) records, records_size, 
-                                  delimeter, strlen (delimeter));
-    
-    rl = calloc (1, sizeof (Record_List));
-    if (!rl)
-    {
-        fprintf (stderr, "%s\n", Error_Memory);
-        Token_free (record_list);
-        return failure;
-    }
-
-    rl->record_list  = NULL;
-    rl->record_count = 0;   
-    rl->record_list = malloc (sizeof (Record*) * record_list->list_size);
-    if (!rl->record_list)
-    {
-        fprintf (stderr, "%s\n", Error_Memory);
-        Token_free (record_list);
-        return failure;
-    }
-    rl->record_count = record_list->list_size;
-    if (rl->record_count == 0)
-    {
-        Token_free (record_list);
-        return rl;
-    }
-
-    for (i = 0; i < record_list->list_size; i++) 
-    {
-        Record *r = load_record_from_token (record_list->token_list[i]);
-        
-        if (r)
-                rl->record_list[j++] = r;
-        else 
-        {
-            rl->record_count--;
-            rl->record_list = realloc (rl->record_list, 
-                                       sizeof (Record*) * rl->record_count);
-        }
-    }
-
-    Token_free (record_list);
-    return rl;
-}
-*/
 
 int rm_exclusion_chars (Record *r)
 {
