@@ -632,7 +632,7 @@ int remove_record (Record_List *rl, char *alias)
     ASSERT((rl && alias), "Null args\n");
     int i       = 0;
     int j       = 0;
-	int rec_len = 0;
+    int rec_len = 0;
     uint8_t f   = 0;
 
     /*  If we remove a record, move all other records down the line */
@@ -644,7 +644,7 @@ int remove_record (Record_List *rl, char *alias)
         
         else if (strcmp (alias, rl->record_list[i]->alias) == 0)
         {
-			rec_len = count_record_length (rl->record_list[i]);
+            rec_len = count_record_length (rl->record_list[i]);
             free_record (rl->record_list[i]);
             f = 1;
             j = i;
@@ -654,6 +654,6 @@ int remove_record (Record_List *rl, char *alias)
     if (f)
         rl->record_count--;
 
-	rl->total_length -= rec_len;
+    rl->total_length -= rec_len;
     return f ^ 1;
 }
